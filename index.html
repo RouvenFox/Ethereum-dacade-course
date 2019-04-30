@@ -1,0 +1,259 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css"
+        integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+
+    <title>Identity</title>
+</head>
+
+<body style="
+    background-color:#F0F0F0;
+    padding: 2em;
+  ">
+    <div class="container">
+        <div class="row">
+            <div class="col-4" style="margin: 0 auto;">
+                <h1>Identity</h1>
+
+                <div id="notification" class="alert alert-secondary" role="alert">
+                    Welcome to Identity, register your identity to proof that you are the creator
+                </div>
+
+                <!-- Display Identity and identity info -->
+                <figure class="figure">
+                    <!-- Display Identity here through img url -->
+                    <img id="meme" src="" class="figure-img img-fluid rounded">
+                    <figcaption class="figure-caption">
+                        <!-- Display identity of creator here -->
+                        <h5 id="MemeCreatorName"></h5>
+                        <!-- Display time of identity registration here -->
+                        <p id="timeproof"></p>
+                    </figcaption>
+                </figure>
+
+                <!-- Loader gif to indicate that something is happening when we make call or insert to blockchain -->
+                <br>
+                <img id="loader" style="width:100px; display:none;"
+                    src="https://i.giphy.com/media/QLxKXLRTwSDY7NuVfG/giphy.webp">
+
+
+                <!-- Input fields to register identity  -->
+
+                <!-- Input identity image url to register-->
+                <div class="form-group">
+                    <label for="url">Url</label>
+                    <input type="text" class="form-control" id="url"
+                        placeholder="Enter the url of identity to register">
+                </div>
+
+                <!-- Input user name to register-->
+                <div class="form-group">
+                    <label for="name">Name</label>
+                    <input type="text" class="form-control" id="name" placeholder="Enter your name">
+                </div>
+
+                <div class="form-group">
+                    <label for="name">Country</label>
+                    <input type="text" class="form-control" id="county" placeholder="Enter your country">
+                </div>
+
+                <div class="form-group">
+                    <label for="name">State</label>
+                    <input type="text" class="form-control" id="state" placeholder="Enter your state">
+                </div>
+
+                <button id="RegisterButton" class="btn btn-primary">Register identity</button>
+                <br><br>
+
+                <!-- Input field to get Identity from blockchain -->
+                <div class="form-group">
+                    <label for="geturl">Get url</label>
+                    <input type="text" class="form-control" id="geturl"
+                        placeholder="Enter url of identity you want to check">
+                </div>
+
+                <button id="GetButton" class="btn btn-primary">Get identity by url</button>
+
+
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+        integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+        crossorigin="anonymous"></script>
+
+    <script>
+        window.addEventListener('load', async () => {
+            // Modern dapp browsers...
+            if (window.ethereum) {
+                window.web3 = new Web3(ethereum);
+                try {
+                    // Request account access if needed
+                    await ethereum.enable();
+                    // Acccounts now exposed
+                    web3.eth.defaultAccount = web3.eth.accounts[0];
+                    console.log(web3.eth.defaultAccount);
+                } catch (error) {
+                    // User denied account access...
+                }
+            }
+            // Legacy dapp browsers...
+            else if (window.web3) {
+                window.web3 = new Web3(web3.currentProvider);
+                // Acccounts always exposed
+            }
+            // Non-dapp browsers...
+            else {
+                console.log('Non-Ethereum browser detected. You should consider trying MetaMask!');
+            }
+        });
+        var contract = web3.eth.contract([
+            {
+                "constant": false,
+                "inputs": [
+
+                    "name": "_url",
+                    {
+                        "type": "string"
+                    },
+                    {
+                        "name": "_name",
+                        "type": "string"
+                    },
+                    {
+                        "name": "_country",
+                        "type": "string"
+                    },
+                    {
+                        "name": "_state",
+                        "type": "string"
+                    }
+
+                ],
+                "name": "setIdentitycert",
+                "outputs": [],
+                "payable": false,
+                "stateMutability": "nonpayable",
+                "type": "function"
+            },
+            {
+                "constant": true,
+                "inputs": [
+                    {
+                        "name": "_url",
+                        "type": "string"
+                    }
+                ],
+                "name": "getMemecert",
+                "outputs": [
+                    {
+                        "name": "",
+                        "type": "string"
+                    },
+                    {
+                        "name": "",
+                        "type": "uint256"
+                    }
+                ],
+                "payable": false,
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "anonymous": false,
+                "inputs": [
+                    {
+                        "indexed": false,
+                        "name": "name",
+                        "type": "string"
+                    },
+                    {
+                        "indexed": false,
+                        "name": "timestamp",
+                        "type": "uint256"
+                    },
+                    {
+                        "indexed": false,
+                        "name": "url",
+                        "type": "string"
+                    }
+                ],
+                "name": "identitycertInfo",
+                "type": "event"
+            }
+        ]);
+        var contractAtAddress = contract.at('0xb22d55eda07bb707a229da68941dbb6bc3cf8375');
+        console.log(contractAtAddress);
+
+        $("#RegisterButton").click(function () {
+
+            $("#loader").show();
+            contractAtAddress.setMemecert($("#url").val(), $("#name").val(), (err, res) => {
+                if (err) {
+                    $("#loader").hide();
+                    $("#notification").attr("class", "alert alert-danger");
+                    $("#notification").html('Your identity was not registered');
+                }
+            });
+        });
+        //watch for changes on event
+        var Event = contractAtAddress.memecertInfo({}, 'latest');
+        Event.watch(function (error, result) {
+            //If you get a result hide loader, display result and notification
+            console.log(result);
+            if (result) {
+                $("#loader").hide();
+                $("#identitytCreatorName").html('by ' + (result.args.name));
+                $("#timeproof").html('registered on ' + new Date((result.args.timestamp['c'][0]) * 1000));
+                $("#identity").attr("src", (result.args.url));
+                $("#notification").attr("class", "alert alert-success");
+                $("#notification").html('Your identity is now registered');
+            } else {
+                $("#loader").hide();
+                $("#Identity").attr("src", (""));
+                $("#notification").attr("class", "alert alert-danger");
+                $("#notification").html('Your identity was not successful registered');
+            }
+        });
+
+        $("#GetButton").click(function () {
+            $("#loader").show();
+            contractAtAddress.getIdentitycert($("#geturl").val(), (err, res) => {
+                if (res[0]) {
+                    $("#loader").hide();
+                    $("#IdentityCreatorName").html('by ' + res[0]);
+                    $("#timeproof").html('registered on ' + new Date((res[1]['c'][0]) * 1000));
+                    $("#identity").attr("src", $("#geturl").val());
+                    $("#notification").attr("class", "alert alert-success");
+                    $("#notification").html('Identity was registered');
+                } else {
+                    $("#loader").hide();
+                    $("#identity").attr("src", (""));
+                    $("#IdentityCreatorName").html("");
+                    $("#timeproof").html("");
+                    $("#notification").attr("class", "alert alert-secondary");
+                    $("#notification").html('Identity not yet registered');
+                }
+            });
+        });
+    </script>
+
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"
+        integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49"
+        crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"
+        integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy"
+        crossorigin="anonymous"></script>
+</body>
+
+</html>
